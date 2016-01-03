@@ -58,6 +58,11 @@ in this form is simply used as:
 You can do much more with this syntax, such as modifier pipelines. All of which
 is explained below.
 
+##### Delimiters
+
+You can define templating delimiters with the -d switch.
+Default is `-d "{{ }}"`. Make shure left and right delimiter are seperated by blank.
+
 ### Functions
 
 There are a number of builtin functions that can be used as modifiers,

@@ -15,10 +15,11 @@ import (
 var Version string
 
 var (
-	filename = flag.String("f", "", "use template file instead of STDIN")
-	inline   = flag.String("i", "", "use inline template string instead of STDIN")
-	posix    = flag.Bool("p", false, "preprocess with POSIX variable expansion")
-	version  = flag.Bool("v", false, "prints version")
+	filename   = flag.String("f", "", "use template file instead of STDIN")
+	inline     = flag.String("i", "", "use inline template string instead of STDIN")
+	delimiters = flag.String("d", "{{ }}", "use defined delimiters for template parsing")
+	posix      = flag.Bool("p", false, "preprocess with POSIX variable expansion")
+	version    = flag.Bool("v", false, "prints version")
 )
 
 func template() ([]byte, string, error) {
@@ -49,6 +50,9 @@ func main() {
 	if *posix {
 		sigil.PosixPreprocess = true
 	}
+
+	sigil.Delimiters = *delimiters
+
 	if os.Getenv("SIGIL_PATH") != "" {
 		sigil.TemplatePath = strings.Split(os.Getenv("SIGIL_PATH"), ":")
 	}

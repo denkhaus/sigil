@@ -16,6 +16,7 @@ import (
 var (
 	TemplatePath    []string
 	PosixPreprocess bool
+	Delimiters      string
 )
 
 var fnMap = template.FuncMap{}
@@ -80,17 +81,31 @@ func restoreEnv(env []string) {
 	}
 }
 
+func decodeDelimiters() (string, string, error) {
+	del := strings.SplitN(Delimiters, " ", 2)
+	if len(del) != 2 {
+		return "", "", fmt.Errorf("found malformed delimiter: %q, use '{{ }}' or '[[ ]]'", Delimiters)
+	}
+	return del[0], del[1], nil
+}
+
 func Execute(input []byte, vars map[string]string, name string) (bytes.Buffer, error) {
 	var tmplVars string
 	var err error
 	defer restoreEnv(os.Environ())
+
+	left, right, err := decodeDelimiters()
+	if err != nil {
+		return bytes.Buffer{}, err
+	}
+
 	for k, v := range vars {
 		err := os.Setenv(k, v)
 		if err != nil {
 			return bytes.Buffer{}, err
 		}
 		escaped := strings.Replace(v, "\"", "\\\"", -1)
-		tmplVars = tmplVars + fmt.Sprintf("{{ $%s := \"%s\" }}", k, escaped)
+		tmplVars = tmplVars + fmt.Sprintf("%s $%s := \"%s\" %s", left, k, escaped, right)
 	}
 	inputStr := string(input)
 	if PosixPreprocess {
@@ -99,8 +114,11 @@ func Execute(input []byte, vars map[string]string, name string) (bytes.Buffer, e
 			return bytes.Buffer{}, err
 		}
 	}
-	inputStr = strings.Replace(inputStr, "\\}}\n{{", "}}{{", -1)
-	tmpl, err := template.New(name).Funcs(fnMap).Parse(tmplVars + inputStr)
+
+	replOld := fmt.Sprintf("\\%s\n%s", right, left)
+	replNew := fmt.Sprintf("%s%s", right, left)
+	inputStr = strings.Replace(inputStr, replOld, replNew, -1)
+	tmpl, err := template.New(name).Funcs(fnMap).Delims(left, right).Parse(tmplVars + inputStr)
 	if err != nil {
 		return bytes.Buffer{}, err
 	}
