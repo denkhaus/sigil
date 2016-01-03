@@ -13,8 +13,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/denkhaus/sigil"
 	"github.com/dustin/go-jsonpointer"
-	"github.com/gliderlabs/sigil"
 	"gopkg.in/yaml.v2"
 )
 
