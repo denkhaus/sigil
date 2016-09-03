@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gliderlabs/sigil"
-	_ "github.com/gliderlabs/sigil/builtin"
+	"github.com/denkhaus/sigil"
+	_ "github.com/denkhaus/sigil/builtin"
 )
 
 var Version string
